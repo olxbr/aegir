@@ -1,0 +1,18 @@
+rules:
+- name: ha_only
+  namespace: "*"
+  resource_type: "Deployment"
+  rules_definitions:
+  - field: "spec.containers.#.name"
+    livr_rule:
+      description: "Container name must be erick"
+      rule:
+        name:
+          eq: 'erick'
+  - field: "spec.containers.#.THIS_PATH_DOES_NOT_EXIST"
+    livr_rule:
+      description: "Container name must be erick"
+      rule:
+        name:
+          eq: 'erick'
+  slack_notification_channel: "#gac-notifications"

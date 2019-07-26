@@ -1,0 +1,52 @@
+rules:
+- name: useless_rules
+  namespace: "*"
+  resource_type: "Deployment"
+  rules_definitions:
+  - field: "spec.template.spec.containers.#.name"
+    livr_rule:
+      description: "Container name must be foo or bar"
+      rule:
+        name:
+          one_of: ['foo', 'bar']
+  slack_notification_channel: "#some-notifications-channel"
+- name: labels_app_release_and_cpu_requests_are_required
+  namespace: "*"
+  resource_type: "Deployment"
+  rules_definitions:
+  - field: "metadata.labels"
+    livr_rule:
+      description: "release and app labels are required"
+      rule:
+        labels:
+          nested_object:
+            app: required
+            release:
+            - required
+  - field: "spec.template.spec.containers.#.resources.requests.cpu"
+    livr_rule:
+      description: "ensure minimum cpu request"
+      rule:
+        cpu: required
+  slack_notification_channel: "#some-notifications-channel"
+- name: container_user_could_not_be_root
+  namespace: "*"
+  resource_type: "Deployment"
+  rules_definitions:
+  - field: "spec.template.spec.securityContext.runAsUser"
+    livr_rule:
+      description: "Only non-root users are allowed"
+      rule:
+        runAsUser:
+          number_between: [1, 1000]
+  slack_notification_channel: "#some-notifications-channel"
+- name: useless_rules_ingresses
+  namespace: "*"
+  resource_type: "Ingress"
+  rules_definitions:
+  - field: "spec.tls"
+    livr_rule:
+      description: "TLS is required"
+      rule:
+        tls: required
+  slack_notification_channel: "#some-notifications-channel"

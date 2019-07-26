@@ -1,0 +1,79 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: aegir
+    release: "v0.1.0"
+  name: aegir
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: "aegir"
+      release: "v0.1.0"
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: aegir
+        release: "v0.1.0"
+    spec:
+      containers:
+      - image: grupozap/aegir:v0.1.0
+        imagePullPolicy: Always
+        name: aegir
+        args:
+        - server
+        - --rules-file /etc/aegir/rules.yaml
+        - --slack-token $(SLACK_TOKEN)
+        - --tls-cert-file /aegir/tls/aegir-cert.pem
+        - --tls-cert-key /aegir/tls/aegir-key.pem
+        env:
+          - name: SLACK_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aegir
+                key: slack_token
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /admission
+            port: https
+            scheme: https
+            host: aegir.platform.svc.cluster.local
+        resources:
+          limits:
+            cpu: "1"
+            memory: 512Mi
+          requests:
+            memory: 200Mi
+        volumeMounts:
+        - name: aegir-rules
+          mountPath: /etc/aegir
+        - name: tls-certificates
+          mountPath: /aegir/tls
+      volumes:
+      - name: aegir-rules
+        configMap:
+          name: aegir-rules
+          items:
+          - path: rules.yaml
+            key: data
+      - name: aegir-certificates
+        secret:
+          secretName: aegir
+          items:
+          - path: aegir-cert.pem
+            key: cert.pem
+          - path: aegir-key.pem
+            key: key.pem
