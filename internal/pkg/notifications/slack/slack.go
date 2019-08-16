@@ -20,9 +20,9 @@ func NotifyViolation(message NotificationMessage, botToken, channelString, color
 	api := slack.New(botToken)
 	attachment := slack.Attachment{
 		Fallback: "A rule violation has occurred.",
-		Pretext:  "The following rules violations has been occurred in Hammurabi's code:",
+		Pretext:  "The following rules violations has been occurred:",
 		Text:     message.Message,
-		Footer:   "Hammurabi's Code",
+		Footer:   "Aegir",
 		Ts:       json.Number(ts),
 		Color:    color,
 		Fields: []slack.AttachmentField{
@@ -42,7 +42,7 @@ func NotifyViolation(message NotificationMessage, botToken, channelString, color
 		return
 	}
 	if err != nil {
-		log.Printf("%s\n", err)
+		log.Printf("Error sending slack notification: %s\n", err)
 		return
 	}
 	log.Printf("Message successfully sent to channel %s at %s\n", channelString, timestamp)

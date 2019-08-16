@@ -1,6 +1,9 @@
 # Ægir
 
-Aegir is a simple and generic webhook admission controller for Kubernetes.
+![Aegir](https://upload.wikimedia.org/wikipedia/commons/9/98/%C3%86gir%2C_ruler_of_the_ocean.jpg)
+
+
+### Aegir is a simple and generic webhook admission controller for Kubernetes.
 
 It allows you to write custom rules for your cluster resources. If your rule is violated, Aegir will not allow the resource to be created and will display a message on the terminal, optionally it can send a notification in a Slack channel.
 

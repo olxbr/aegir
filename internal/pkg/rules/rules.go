@@ -46,13 +46,12 @@ var ruleStore = map[string][]*Rule{}
 func RulesLoader(fp string) RulesList {
 	file, err := ioutil.ReadFile(fp)
 	if err != nil {
-		log.Printf("could not read file: %q", err)
+		log.Fatalf("could not read file: %q", err)
 	}
 	var rules RulesList
 	err = yaml.Unmarshal(file, &rules)
 	if err != nil {
-		log.Printf("err: %v\n", err)
-		panic(err)
+		log.Fatalf("err: %v\n", err)
 	}
 	return rules
 }
@@ -76,11 +75,11 @@ func (ruledef *RuleDefinition) registerRule() *livr.Validator {
 	r, _ := yaml.Marshal(ruledef.LivrRule.RuleObj)
 	j, err := y2j.YAMLToJSON(r)
 	if err != nil {
-		panic(err)
+		log.Fatalf("something wrong when converting YAML to JSON, erro: %v", err)
 	}
 	err = json.Unmarshal(j, &rule)
 	if err != nil {
-		panic(err)
+		log.Fatalf("something wrong unmarshaling JSON to LIVR")
 	}
 	return livr.New(&livr.Options{LivrRules: rule})
 }

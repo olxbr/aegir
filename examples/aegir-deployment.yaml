@@ -3,8 +3,8 @@ kind: Deployment
 metadata:
   generation: 1
   labels:
-    app: aegir
     release: "v0.1.0"
+    app: "aegir"
   name: aegir
 spec:
   progressDeadlineSeconds: 600
@@ -13,7 +13,6 @@ spec:
   selector:
     matchLabels:
       app: "aegir"
-      release: "v0.1.0"
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -26,15 +25,19 @@ spec:
         release: "v0.1.0"
     spec:
       containers:
-      - image: grupozap/aegir:v0.1.0
+      - image: vivareal/aegir:latest
         imagePullPolicy: Always
         name: aegir
         args:
         - server
-        - --rules-file /etc/aegir/rules.yaml
-        - --slack-token $(SLACK_TOKEN)
-        - --tls-cert-file /aegir/tls/aegir-cert.pem
-        - --tls-cert-key /aegir/tls/aegir-key.pem
+        - --rules-file
+        - /etc/aegir/rules.yaml
+        - --slack-token
+        - $(SLACK_TOKEN)
+        - --tls-cert-file
+        - /aegir/tls/aegir-cert.crt
+        - --tls-key-file
+        - /aegir/tls/aegir-key.crt
         env:
           - name: SLACK_TOKEN
             valueFrom:
@@ -47,20 +50,20 @@ spec:
           protocol: TCP
         livenessProbe:
           httpGet:
-            path: /admission
+            path: /healthcheck
             port: https
-            scheme: https
-            host: aegir.platform.svc.cluster.local
+            scheme: HTTPS
         resources:
           limits:
             cpu: "1"
             memory: 512Mi
           requests:
-            memory: 200Mi
+            cpu: 100m
+            memory: 128Mi
         volumeMounts:
         - name: aegir-rules
           mountPath: /etc/aegir
-        - name: tls-certificates
+        - name: aegir-tls
           mountPath: /aegir/tls
       volumes:
       - name: aegir-rules
@@ -68,12 +71,12 @@ spec:
           name: aegir-rules
           items:
           - path: rules.yaml
-            key: data
-      - name: aegir-certificates
+            key: rules-qa.yaml
+      - name: aegir-tls
         secret:
-          secretName: aegir
+          secretName: aegir-tls
           items:
-          - path: aegir-cert.pem
-            key: cert.pem
-          - path: aegir-key.pem
-            key: key.pem
+          - path: aegir-cert.crt
+            key: tls.crt
+          - path: aegir-key.crt
+            key: tls.key
