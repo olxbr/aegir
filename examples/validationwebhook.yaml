@@ -4,6 +4,7 @@ metadata:
   name: example-webhook
 webhooks:
   - name: aegir.example.svc
+    sideEffects: NoneOnDryRun
     clientConfig:
       service:
         name: aegir
