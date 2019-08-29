@@ -88,6 +88,7 @@ metadata:
   name: aegir-webhook
 webhooks:
   - name: aegir.example.svc
+    sideEffects: NoneOnDryRun
     clientConfig:
       service:
         name: aegir
@@ -110,6 +111,11 @@ webhooks:
         - services
         - ingresses
   ```
+
+  ### Important note
+  `sideEffects` should be set to `NoneOnDryRun` so `Aegir` can validate the rules when you run `--server-dry-run` with `kubectl`. This is useful
+  running CI/CD pipelines or trying to validate the configuration of the object.
+
 
 ### TLS certificates
 
