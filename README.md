@@ -114,7 +114,7 @@ webhooks:
 
   ### Important note
   `sideEffects` should be set to `NoneOnDryRun` so `Aegir` can validate the rules when you run `--server-dry-run` with `kubectl`. This is useful
-  running CI/CD pipelines or trying to validate the configuration of the object.
+  running CI/CD pipelines or trying to validate the configuration of the object before persisting it on ETCD
 
 
 ### TLS certificates
