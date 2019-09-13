@@ -2,7 +2,7 @@ ENV ?= local
 KERNEL := $$(uname | tr '[:upper:]' '[:lower:]')
 GOPKGS := $$(go list ./... | grep -v /vendor/)
 VERSION ?= latest
-KUBECTL_VERSION = "v1.11.7"
+KUBECTL_VERSION = "v1.13.10"
 SLACK_TOKEN ?= none
 
 default: generate test build

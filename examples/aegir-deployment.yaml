@@ -39,6 +39,8 @@ spec:
         - --tls-key-file
         - /aegir/tls/aegir-key.crt
         env:
+          - name: SKIP_NAMESPACES
+            value: "istio-system,kube-system"
           - name: SLACK_TOKEN
             valueFrom:
               secretKeyRef:

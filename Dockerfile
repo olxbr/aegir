@@ -1,4 +1,4 @@
-FROM golang:1.12.7-alpine
+FROM golang:1.13.0-alpine3.10
 WORKDIR /go/src/github.com/grupozap/aegir
 ADD . .
 RUN apk add --no-cache gcc git make musl-dev tar curl ca-certificates && \

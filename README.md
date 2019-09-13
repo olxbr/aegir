@@ -117,6 +117,11 @@ webhooks:
   running CI/CD pipelines or trying to validate the configuration of the object before persisting it on ETCD
 
 
+### Skipping some namespaces
+
+If you have defined a rule with `*` this rule will run against all namespaces. Sometimes is useful to skip some namespaces, like `kube-system`, `istio-system` and etc.
+To do this you can set the environment variable `SKIP_NAMESPACES=namespace1,namespace2,namespace3`, and these namespaces will be skipped at rule evaluation.
+
 ### TLS certificates
 
 The Kubernetes API needs to trust the certificate to connect to Aegir's webhook.
