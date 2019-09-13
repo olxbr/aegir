@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -48,19 +47,19 @@ func init() {
 	serverCmd.PersistentFlags().StringVar(&tlsCertPath, "tls-cert-file", "", "Path to TLS certificate file")
 	serverCmd.PersistentFlags().StringVar(&tlsKeyPath, "tls-key-file", "", "Path to TLS key file")
 	serverCmd.PersistentFlags().StringVar(&rulesFile, "rules-file", "", "File that contains the rules that will be applied for the Kubernetes resources.")
-	serverCmd.PersistentFlags().StringVar(&slackToken, "slack-token", "", "Slack API Token to enable Hammurabi notifications")
+	serverCmd.PersistentFlags().StringVar(&slackToken, "slack-token", "", "Slack API Token to enable Aegir notifications")
 	serverCmd.PersistentFlags().StringVar(&listenPort, "port", "8443", "TCP port that connections will be listen.")
 }
 
 func initConfig() {
 	if rulesFile == "" {
-		fmt.Printf("You must provide a rules file valid path. Eg: %s %s --rules-file=/path/to/file/rules.yaml\n", RootCmd.Name(), serverCmd.Name())
-		os.Exit(1)
+		log.Fatalf("You must provide a rules file valid path. Eg: %s %s --rules-file=/path/to/file/rules.yaml\n", RootCmd.Name(), serverCmd.Name())
 	}
 }
 
 var (
 	universalDeserializer = serializer.NewCodecFactory(runtime.NewScheme()).UniversalDeserializer()
+	skippedNamespaces, _  = utils.GetEnvAsSlice("SKIP_NAMESPACES", ",")
 )
 
 type validationFunc func(*v1beta1.AdmissionRequest) []*utils.Violation
@@ -71,6 +70,9 @@ func validateRules(req *v1beta1.AdmissionRequest) []*utils.Violation {
 	json.Unmarshal(raw, &rsc)
 	var violationsSlice []*utils.Violation
 	for _, rule := range rules.GetRules(req.Namespace, req.Kind.Kind) {
+		if utils.Include(skippedNamespaces, req.Namespace) {
+			continue
+		}
 		for _, ruledef := range rule.RulesDefinitions {
 			violations := ruledef.GetViolations(string(raw))
 			for _, violated := range violations {
