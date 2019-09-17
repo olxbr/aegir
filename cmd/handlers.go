@@ -70,7 +70,8 @@ func validateRules(req *v1beta1.AdmissionRequest) []*utils.Violation {
 	json.Unmarshal(raw, &rsc)
 	var violationsSlice []*utils.Violation
 	for _, rule := range rules.GetRules(req.Namespace, req.Kind.Kind) {
-		if utils.Include(skippedNamespaces, req.Namespace) {
+		//Skip rule if namespace is inside SKIP_NAMESPACES environment variable
+		if rule.Namespace == "*" && utils.Include(skippedNamespaces, req.Namespace) {
 			continue
 		}
 		for _, ruledef := range rule.RulesDefinitions {
