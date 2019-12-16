@@ -412,11 +412,6 @@ var test_pod = `{
             }
         ],
         "dnsPolicy": "ClusterFirst",
-        "imagePullSecrets": [
-            {
-                "name": "viva-registry"
-            }
-        ],
         "nodeName": "ip-10-160-105-143.ec2.internal",
         "priority": 0,
         "restartPolicy": "Always",
