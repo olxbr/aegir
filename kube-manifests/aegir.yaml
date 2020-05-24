@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   generation: 1
@@ -25,15 +25,13 @@ spec:
         release: "v0.1.0"
     spec:
       containers:
-      - image: vivareal/aegir:latest
+      - image: __REPO_IMAGE_TAG__
         imagePullPolicy: Always
         name: aegir
         args:
         - server
         - --rules-file
         - /etc/aegir/rules.yaml
-        - --slack-token
-        - $(SLACK_TOKEN)
         - --tls-cert-file
         - /aegir/tls/aegir-cert.crt
         - --tls-key-file
@@ -41,11 +39,6 @@ spec:
         env:
           - name: SKIP_NAMESPACES
             value: "istio-system,kube-system"
-          - name: SLACK_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: aegir
-                key: slack_token
         ports:
         - containerPort: 8443
           name: https
@@ -73,7 +66,7 @@ spec:
           name: aegir-rules
           items:
           - path: rules.yaml
-            key: rules-qa.yaml
+            key: rules.yaml
       - name: aegir-tls
         secret:
           secretName: aegir-tls
@@ -82,3 +75,21 @@ spec:
             key: tls.crt
           - path: aegir-key.crt
             key: tls.key
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: aegir
+  name: aegir
+spec:
+  ports:
+  - name: http
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app: aegir
+  sessionAffinity: None
+  type: ClusterIP
