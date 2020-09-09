@@ -36,3 +36,6 @@ Icon
 
 # Thumbnails
 ._*
+
+/tmp-tls
+/tools

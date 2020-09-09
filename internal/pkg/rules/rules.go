@@ -26,8 +26,9 @@ type Rule struct {
 }
 
 type RuleDefinition struct {
-	Field    string     `yaml:"field"`
-	LivrRule RuleObject `yaml:"livr_rule"`
+	Field           string     `yaml:"field"`
+	FieldIsOptional bool       `yaml:"field_is_optional"`
+	LivrRule        RuleObject `yaml:"livr_rule"`
 }
 
 type RuleObject struct {
@@ -75,7 +76,7 @@ func (ruledef *RuleDefinition) registerRule() *livr.Validator {
 	r, _ := yaml.Marshal(ruledef.LivrRule.RuleObj)
 	j, err := y2j.YAMLToJSON(r)
 	if err != nil {
-		log.Fatalf("something wrong when converting YAML to JSON, erro: %v", err)
+		log.Fatalf("something wrong when converting YAML to JSON, error: %v", err)
 	}
 	err = json.Unmarshal(j, &rule)
 	if err != nil {
@@ -87,13 +88,16 @@ func (ruledef *RuleDefinition) registerRule() *livr.Validator {
 func (ruledef *RuleDefinition) GetViolations(obj string) []*utils.Violation {
 	violations := make([]*utils.Violation, 0)
 	jp := gjson.Get(obj, ruledef.Field)
-	if !jp.Exists() || (jp.IsArray() && len(jp.Array()) == 0) {
-		fieldNotFound := &utils.Violation{
-			Description: ruledef.LivrRule.Description,
-			JSONPath:    ruledef.Field,
-			Message:     fmt.Sprintf("Field: %s is required", ruledef.Field),
+	//If field is optional, don't check if it exists.
+	if !ruledef.FieldIsOptional {
+		if !jp.Exists() || (jp.IsArray() && len(jp.Array()) == 0) {
+			fieldNotFound := &utils.Violation{
+				Description: ruledef.LivrRule.Description,
+				JSONPath:    ruledef.Field,
+				Message:     fmt.Sprintf("Field: %s is required", ruledef.Field),
+			}
+			violations = append(violations, fieldNotFound)
 		}
-		violations = append(violations, fieldNotFound)
 	}
 	for _, jsonobj := range GetJSONObjectByPath(obj, ruledef.Field) {
 		validator := ruledef.registerRule()
