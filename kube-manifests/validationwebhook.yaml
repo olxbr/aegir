@@ -1,17 +1,17 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: example-webhook
+  name: aegir-webhook
 webhooks:
-  - name: aegir.example.svc
+  - name: aegir.default.svc
     sideEffects: NoneOnDryRun
     clientConfig:
       service:
         name: aegir
-        namespace: example
+        namespace: default
         # This path should be /admission
         path: "/admission"
-      caBundle: base64 encoded CA certificate
+      caBundle: __BASE64_CABUNDLE__
     rules:
       - apiGroups:
         - apps

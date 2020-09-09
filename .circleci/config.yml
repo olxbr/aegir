@@ -1,0 +1,85 @@
+version: 2.1
+defaults: &defaults
+  docker:
+    - image: circleci/golang:1.13.9
+      auth:
+        username: ${DOCKER_USERNAME}
+        password: ${DOCKER_PASSWORD}
+commands:
+  docker_save:
+    description: "Save docker image to use it later"
+    parameters:
+      path:
+        type: string
+        default: /tmp/aegir/aegir.tar
+      image:
+        type: string
+        default: "vivareal/aegir:"
+      image_tag:
+        type: env_var_name
+        default: CIRCLE_SHA1
+    steps:
+      - run: mkdir -p /tmp/aegir
+      - run: docker save -o << parameters.path >> << parameters.image >>${<< parameters.image_tag >>}
+      - save_cache:
+          key: aegir-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - << parameters.path >>
+  docker_restore:
+    description: "Restore a docker image previously used"
+    parameters:
+      tag:
+        type: env_var_name
+        default: CIRCLE_SHA1
+      cache-key:
+        type: string
+        default: aegir-{{ .Environment.CIRCLE_SHA1 }}
+      path:
+        type: string
+        default: /tmp/aegir/aegir.tar
+    steps:
+      - restore_cache:
+          keys:
+            - << parameters.cache-key >>
+      - run: docker load < << parameters.path >>
+jobs:
+  BUILD:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: build docker image
+          command: make docker_build
+      - run:
+          name: running unit tests
+          command: make docker_test
+      - docker_save
+  SMOKE_TEST:
+    machine:
+      image: ubuntu-1604:202004-01
+    steps:
+      - checkout
+      - docker_restore
+      - run:
+          name: Run smoke test
+          command: make smoke_test
+  publish_image:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - docker_restore
+      - run: make docker_publish
+workflows:
+  version: 2
+  build:
+    jobs:
+      - BUILD:
+          context: build-context
+      - SMOKE_TEST:
+          requires:
+            - BUILD
+          context: build-context
