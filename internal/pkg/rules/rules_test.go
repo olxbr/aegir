@@ -544,3 +544,29 @@ func TestGetViolationsFoundViolations(t *testing.T) {
 		assert.DeepEqual(t, v[0], violation)
 	}
 }
+
+func TestGetViolationsFieldIsOptional(t *testing.T) {
+	rulesloaded := RulesLoader("testing_rules.yaml")
+	for _, rule := range rulesloaded.Rules {
+		v := rule.RulesDefinitions[2].GetViolations(test_pod)
+		if len(v) != 0 {
+			t.Error("Expecting 0 violations")
+		}
+	}
+}
+
+func TestGetViolationsFieldIsRequired(t *testing.T) {
+	rulesloaded := RulesLoader("testing_rules.yaml")
+	violation := &utils.Violation{
+		Description: "This field is NOT optional and should fail if it does not exists",
+		JSONPath:    "spec.containers.#.THIS_PATH_DOES_NOT_EXIST_BUT_MUST",
+		Message:     fmt.Sprint("Field: spec.containers.#.THIS_PATH_DOES_NOT_EXIST_BUT_MUST is required"),
+	}
+	for _, rule := range rulesloaded.Rules {
+		v := rule.RulesDefinitions[3].GetViolations(test_pod)
+		if len(v) < 1 {
+			t.Error("Expecting 1 violation")
+		}
+		assert.DeepEqual(t, v[0], violation)
+	}
+}
