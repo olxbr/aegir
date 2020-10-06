@@ -10,7 +10,7 @@ import (
 	"github.com/grupozap/aegir/internal/pkg/utils"
 	livr "github.com/k33nice/go-livr"
 	"github.com/tidwall/gjson"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type RulesList struct {
@@ -76,11 +76,11 @@ func (ruledef *RuleDefinition) registerRule() *livr.Validator {
 	r, _ := yaml.Marshal(ruledef.LivrRule.RuleObj)
 	j, err := y2j.YAMLToJSON(r)
 	if err != nil {
-		log.Fatalf("something wrong when converting YAML to JSON, error: %v", err)
+		log.Fatalf("something went wrong when converting YAML to JSON, error: %v", err)
 	}
 	err = json.Unmarshal(j, &rule)
 	if err != nil {
-		log.Fatalf("something wrong unmarshaling JSON to LIVR")
+		log.Fatalf("something went wrong unmarshaling JSON to LIVR: %s", err)
 	}
 	return livr.New(&livr.Options{LivrRules: rule})
 }

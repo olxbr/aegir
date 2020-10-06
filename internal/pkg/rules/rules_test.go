@@ -534,7 +534,7 @@ func TestGetJSONObjectByPathOneArray(t *testing.T) {
 func TestGetViolationsFoundViolations(t *testing.T) {
 	rulesloaded := RulesLoader("testing_rules.yaml")
 	violation := &utils.Violation{
-		Description: "Container name must be erick",
+		Description: "Container name must be skull",
 		JSONPath:    "spec.containers.#.name",
 		Object:      map[string]interface{}{"name": string("authnetes")},
 		Message:     fmt.Sprint("validation error"),

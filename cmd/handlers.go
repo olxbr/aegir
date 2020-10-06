@@ -12,7 +12,7 @@ import (
 
 	"net/http"
 
-	"github.com/grupozap/aegir/internal/pkg/notifications/slack"
+	notifications "github.com/grupozap/aegir/internal/pkg/notifications/slack"
 	"github.com/grupozap/aegir/internal/pkg/rules"
 	"github.com/grupozap/aegir/internal/pkg/utils"
 	"github.com/spf13/cobra"
@@ -20,9 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-	_ "k8s.io/kubernetes/pkg/apis/apps"
-	_ "k8s.io/kubernetes/pkg/apis/extensions/install"
-	_ "k8s.io/kubernetes/pkg/apis/extensions/v1beta1"
 )
 
 const (
@@ -151,7 +148,7 @@ func handleAdmissionRequest(w http.ResponseWriter, r *http.Request, v validation
 	}
 	response, err := json.Marshal(admissionReviewResponse)
 	if err != nil {
-		return nil, fmt.Errorf("error marshiling response: %q", err)
+		return nil, fmt.Errorf("error marshaling response: %q", err)
 	}
 	return response, nil
 }
