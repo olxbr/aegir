@@ -36,9 +36,10 @@ docker_test:
 	docker run --rm --entrypoint /bin/sh vivareal/aegir:${GIT_REVISION}-build -c "make test"
 
 docker_publish:
-	docker build --target dry-app . vivareal/aegir:${GIT_REVISION}
-	docker tag vivareal/aegir
+	docker build --target dry-app . -t vivareal/aegir:${GIT_REVISION}
+	docker tag vivareal/aegir:${GIT_REVISION} vivareal/aegir:latest
 	docker push vivareal/aegir:${GIT_REVISION}
+	docker push vivareal/aegir:latest
 
 deps:
 	-mkdir tools

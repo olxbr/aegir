@@ -38,3 +38,10 @@ func GetEnvAsSlice(name string, sep string) ([]string, bool) {
 	valStr, ok := os.LookupEnv(name)
 	return strings.Split(valStr, sep), ok
 }
+
+func FirstArg(args ...interface{}) interface{} {
+	if len(args) > 0 {
+		return args[0]
+	}
+	return nil
+}

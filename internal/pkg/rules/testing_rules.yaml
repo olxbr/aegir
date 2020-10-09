@@ -5,28 +5,28 @@ rules:
   rules_definitions:
   - field: "spec.containers.#.name"
     livr_rule:
-      description: "Container name must be erick"
+      description: "Container name must be skull"
       rule:
         name:
-          eq: 'erick'
+          eq: 'skull'
   - field: "spec.containers.#.THIS_PATH_DOES_NOT_EXIST"
     livr_rule:
-      description: "Container name must be erick"
+      description: "Container name must be skull"
       rule:
         name:
-          eq: 'erick'
+          eq: 'skull'
   - field: "spec.containers.#.THIS_PATH_DOES_NOT_EXIST"
     field_is_optional: true
     livr_rule:
       description: "This field is optional and should not fail if it does not exists"
       rule:
         name:
-          eq: 'erick'
+          eq: 'skull'
   - field: "spec.containers.#.THIS_PATH_DOES_NOT_EXIST_BUT_MUST"
     field_is_optional: false
     livr_rule:
       description: "This field is NOT optional and should fail if it does not exists"
       rule:
         name:
-          eq: 'erick'
+          eq: 'skull'
   slack_notification_channel: "#gac-notifications"
