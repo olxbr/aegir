@@ -15,7 +15,7 @@ var (
 )
 
 func neq(args ...interface{}) livr.Validation {
-	not_allowed := utils.FirstArg(args...)
+	notAllowed := utils.FirstArg(args...)
 
 	return func(value interface{}, builders ...interface{}) (interface{}, interface{}) {
 		if value == nil || value == "" {
@@ -27,7 +27,7 @@ func neq(args ...interface{}) livr.Validation {
 		default:
 			return nil, errors.New("FORMAT_ERROR")
 		}
-		if fmt.Sprint(value) == fmt.Sprint(not_allowed) {
+		if fmt.Sprint(value) == fmt.Sprint(notAllowed) {
 			return nil, errors.New("NOT_ALLOWED_VALUE")
 		}
 
