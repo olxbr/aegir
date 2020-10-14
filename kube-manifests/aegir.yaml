@@ -33,9 +33,9 @@ spec:
         - --rules-file
         - /etc/aegir/rules.yaml
         - --tls-cert-file
-        - /aegir/tls/aegir-cert.crt
+        - /tls/aegir-cert.crt
         - --tls-key-file
-        - /aegir/tls/aegir-key.crt
+        - /tls/aegir-key.crt
         env:
           - name: SKIP_NAMESPACES
             value: "istio-system,kube-system"
@@ -59,7 +59,7 @@ spec:
         - name: aegir-rules
           mountPath: /etc/aegir
         - name: aegir-tls
-          mountPath: /aegir/tls
+          mountPath: /tls
       volumes:
       - name: aegir-rules
         configMap:
