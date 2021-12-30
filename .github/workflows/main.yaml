@@ -1,0 +1,83 @@
+name: Main
+on:
+  pull_request:
+  push:
+    branches: [master]
+jobs:
+  kubeval:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: validate
+      uses: instrumenta/kubeval-action@master
+      with:
+        files: ./deploy
+        strict: false
+        version: "1.18.12"
+
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    needs: unit-tests
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Restore docker cache
+        uses: actions/cache@v2
+        with:
+          path: ~/docker-cache
+          key: aegir-docker-${{ github.sha }}
+          restore-keys: |
+            aegir-docker-${{ github.sha }}
+            
+      - name: build final docker image
+        run: |
+          docker load < ~/docker-cache/aegir-test.tar
+          make docker_build
+          make docker_test
+          mkdir -p ~/docker-cache-final-image
+          docker save -o ~/docker-cache-final-image/aegir.tar vivareal/aegir
+        
+      - name: Save docker cache final image
+        uses: actions/cache@v2
+        with:
+          path: ~/docker-cache-final-image
+          key: aegir-docker-final-image-${{ github.sha }}
+
+  publish:
+    name: publish
+    needs: build
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: "Get release name"
+        id: "release-name"
+        run: "echo \"::set-output name=release::${GITHUB_REF##*/}\""
+
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Restore docker cache
+        uses: actions/cache@v2
+        with:
+          path: ~/docker-cache-final-image
+          key: aegir-docker-final-image-${{ github.sha }}
+          restore-keys: |
+            aegir-docker-final-image-${{ github.sha }}
+      
+      - name: Load tar file
+        run: docker load < ~/docker-cache-final-image/aegir.tar
+
+      - name: Docker login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: tag publish docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          docker tag vivareal/aegir:build vivareal/aegir:master
+          docker push vivareal/aegir:master
