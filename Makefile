@@ -18,9 +18,20 @@ build: generate
 build/dynamic: generate
 	go build -v
 
+.install-aws-olx:
+ifeq (, $(shell which aws-olx))
+	$(error "No aws-olx in $(PATH), installing...")
+	git clone git@github.com:olxbr/devtools-scripts.git /tmp/devtools-scripts
+	cd /tmp/devtools-scripts/aws-olx
+	make setup
+	cd -
+
+setup-aws-olx: .install-aws-olx
+	aws-olx cross-dev
+
 docker_clean:
 	-rm -v aegir
-	-docker rmi -f vivareal/aegir
+	-docker rmi -f 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir
 
 deploy: kubectl
 	sed -i "s/<IMAGE-TAG>/${GIT_REVISION}/g" deploy/deployment.yaml
@@ -29,17 +40,17 @@ deploy: kubectl
 	./kubectl rollout status deploy/aegir || ./kubectl rollout undo deploy/aegir
 
 docker_build:
-	docker build --target builder -t vivareal/aegir:${GIT_REVISION}-build .
-	docker build --target dry-app -t vivareal/aegir:${GIT_REVISION} .
+	docker build --target builder -t 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:${GIT_REVISION}-build .
+	docker build --target dry-app -t 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:${GIT_REVISION} .
 
 docker_test:
-	docker run --rm --entrypoint /bin/sh vivareal/aegir:${GIT_REVISION}-build -c "make test"
+	docker run --rm --entrypoint /bin/sh 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:${GIT_REVISION}-build -c "make test"
 
 docker_publish:
-	docker build --target dry-app . -t vivareal/aegir:${GIT_REVISION}
-	docker tag vivareal/aegir:${GIT_REVISION} vivareal/aegir:latest
-	docker push vivareal/aegir:${GIT_REVISION}
-	docker push vivareal/aegir:latest
+	docker build --target dry-app . -t 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:${GIT_REVISION}
+	docker tag 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:${GIT_REVISION} 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:latest
+	docker push 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:${GIT_REVISION}
+	docker push 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:latest
 
 deps:
 	-mkdir tools
@@ -60,7 +71,7 @@ lint_kube_manifests:
 .ONESHELL:
 smoke_test: deps lint_kube_manifests
 	@mkdir tmp-tls ; ./genkey.sh tmp-tls ${AEGIR_SVC_NAME}
-	./tools/kind create cluster && ./tools/kind load docker-image vivareal/aegir:${GIT_REVISION}
+	./tools/kind create cluster && ./tools/kind load docker-image 073521391622.dkr.ecr.us-east-1.amazonaws.com/aegir:${GIT_REVISION}
 	./tools/kubectl create configmap --from-file etc/rules.yaml aegir-rules
 	./tools/kubectl create secret tls aegir-tls --cert tmp-tls/webhook-server-tls.crt --key tmp-tls/webhook-server-tls.key
 	sed -e "s/__REPO_IMAGE_TAG__/vivareal\/aegir\:${GIT_REVISION}/" -e "s/imagePullPolicy\:\ Always/imagePullPolicy\:\ Never/" kube-manifests/aegir.yaml | ./tools/kubectl apply -f -
