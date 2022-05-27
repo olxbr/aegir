@@ -39,3 +39,4 @@ Icon
 
 /tmp-tls
 /tools
+!.github/*
